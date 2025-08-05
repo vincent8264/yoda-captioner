@@ -6,7 +6,7 @@ import json
 import os
 
 app = Flask(__name__)
-app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024
+app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024
 
 # Route for the main page
 @app.route('/')
