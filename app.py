@@ -31,7 +31,7 @@ def caption_api():
     # Load image with PIL and resize
     try:
         image = Image.open(file.stream).convert('RGB')
-        image.thumbnail([768,768], Image.LANCZOS)
+        image.thumbnail([384,384], Image.LANCZOS)
     except Exception as e:
         app.logger.error(f'Image loading error: {e}')
         return jsonify({'error': f'Image loading error: {e}'}), 500
