@@ -1,5 +1,7 @@
 import requests
 import os
+import gc
+
 HF_TOKEN = os.environ.get('HF_TOKEN')
 
 def query(image_encoded, args):
@@ -19,5 +21,7 @@ def query(image_encoded, args):
 		headers=headers, 
 		json=payload
 	)
+    del payload
+    gc.collect()
 
     return response.json()[0]

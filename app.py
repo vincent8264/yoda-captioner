@@ -57,7 +57,7 @@ def caption_api():
 
 @app.errorhandler(413)
 def request_entity_too_large(error):
-    return jsonify({'error': 'File too large. Please keep the file size under 5MB'}), 413
+    return jsonify({'error': 'File too large. Please keep the file size under 10MB'}), 413
     
 if __name__ == '__main__':
     app.run(debug=True)
