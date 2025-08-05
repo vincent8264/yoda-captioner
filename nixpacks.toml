@@ -1,2 +1,2 @@
 [start]
-cmd = "gunicorn app:app --timeout 120"
+cmd = "gunicorn app:app --workers 4 --threads 2 --timeout 60"
