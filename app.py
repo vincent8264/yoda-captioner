@@ -1,21 +1,41 @@
 from flask import Flask, request, render_template, jsonify
-from model_api import query
+import requests
 import base64
 import gc
 import json
 import os
 
+HF_TOKEN = os.environ.get('HF_TOKEN')
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024
+
+# HF api for image-to-text model inference
+def query(image_encoded, args):
+    headers = {
+		"Accept" : "application/json",
+		"Authorization": "Bearer " + HF_TOKEN,
+		"Content-Type": "application/json" 
+	}
+    
+    response = requests.post(
+		"https://ahz74gvhq3nyzwbe.us-east-1.aws.endpoints.huggingface.cloud", 
+		headers=headers, 
+		json={
+            "inputs": image_encoded,
+            "generation_args": args
+        }  
+	).json()
+    
+    return response[0]
 
 # Route for the main page
 @app.route('/')
 def index():
     return render_template('index.html')
 
-# Caption api
+# Caption request
 @app.route('/caption', methods=['POST'])
-def caption_api():
+def caption():
     # Check file existence
     file = request.files.get('image')
     if not file:
@@ -50,7 +70,7 @@ def caption_api():
         return jsonify({'error': f'Model error: {response["error"]}'}), 500
     caption = response['generated_caption']
     
-    del image_encoded, args
+    del image_encoded
     gc.collect()
     app.logger.info('Successfully generated caption')    
     return jsonify({'caption': caption})
