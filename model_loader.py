@@ -13,6 +13,7 @@ class ImageCaptionModel:
             "top_k": 40,
             "top_p": 0.4,                        
         }
+        print("Captioning model loaded")
 
     def get_caption(self, image, args):
 
