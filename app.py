@@ -1,14 +1,12 @@
 from flask import Flask, request, render_template, jsonify
-from model_loader import ImageCaptionModel
-from PIL import Image
+from model_api import query
+import base64
 import gc
 import json
 import os
 
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024
-
-model = ImageCaptionModel()
 
 # Route for the main page
 @app.route('/')
@@ -28,13 +26,12 @@ def caption_api():
     if ext not in ['.jpg', '.jpeg', '.png']:
         return jsonify({'error': 'Only .jpg, .jpeg, or .png files are allowed.'}), 400
     
-    # Load image with PIL and resize
+    # Encode Image to base64
     try:
-        image = Image.open(file.stream).convert('RGB')
-        image.thumbnail([384,384], Image.LANCZOS)
+        image_encoded = base64.b64encode(file.read()).decode("utf-8")
     except Exception as e:
-        app.logger.error(f'Image loading error: {e}')
-        return jsonify({'error': f'Image loading error: {e}'}), 500
+        app.logger.error(f'Image encoding error: {e}')
+        return jsonify({'error': f'Image encoding error: {e}'}), 500
     
     # Get generation arguments
     args = {}
@@ -46,14 +43,14 @@ def caption_api():
     except: 
         pass
     
-    # Model Inference
-    try:
-        caption = model.get_caption(image, args)
-    except Exception as e:
-        app.logger.error(f'Model error: {e}')
-        return jsonify({'error': f'Model error: {e}'}), 500
+    # Model Inference with API
+    response = query(image_encoded, args)
+    if 'error' in response:
+        app.logger.error(f'Model error: {response["error"]}')
+        return jsonify({'error': f'Model error: {response["error"]}'}), 500
+    caption = response['generated_caption']
     
-    del image, args
+    del image_encoded, args
     gc.collect()
     app.logger.info('Successfully generated caption')    
     return jsonify({'caption': caption})
@@ -63,4 +60,4 @@ def request_entity_too_large(error):
     return jsonify({'error': 'File too large. Please keep the file size under 5MB'}), 413
     
 if __name__ == '__main__':
-    app.run(debug=False)
+    app.run(debug=True)
