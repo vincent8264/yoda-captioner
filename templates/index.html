@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Image Caption Generator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    .preview-img {
+      max-width: 100%;
+      max-height: 400px;
+      object-fit: contain;
+      margin-bottom: 20px;
+    }
+
+    #outputSection {
+      min-height: 130px;
+    }
+
+    .nowrap {
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body class="bg-light">
+  <div class="container py-5">
+    <h2 class="text-center mb-4">Yoda Captioner</h2>
+    <p class="text-center">Upload an image, you can.</p>
+    <p class="text-center">Tell you what's in it, Yoda will.</p>
+    <!-- Output Section -->
+    <div id="outputSection" class="mt-4 text-center">
+      <h4 id="captionOutput" class="d-none">Yoda:</h4>
+      <p id="captionText" class="lead"></p>
+      <div id="errorBox" class="alert alert-danger d-none"></div>
+    </div>
+
+    <!-- Input Section -->
+    <div class="d-flex justify-content-center">
+      <div class="card shadow p-4 w-100" style="max-width: 720px;">
+        <!-- Image Upload -->
+        <div class="mb-3">
+          <input type="file" id="imageInput" class="form-control" accept=".jpg,.jpeg,.png" onchange="previewImage(this)" />
+        </div>
+
+        <!-- Buttons -->
+        <div class="row justify-content-center mb-3">
+          <div class="col-md-8 col-12 mt-2">
+            <button class="btn btn-primary w-100" id="generateBtn" onclick="generateCaption()">Generate Caption</button>
+          </div>
+          <div class="col-md-4 col-12 mt-2">
+            <button id="toggleSettingsBtn" class="btn btn-secondary w-100" data-bs-toggle="collapse" data-bs-target="#settingsPanel" aria-expanded="false" aria-controls="settingsPanel">
+              Advanced Settings ▼
+            </button>
+          </div>
+        </div>
+
+        <!-- Advanced Settings -->
+        <div class="collapse" id="settingsPanel">
+          <div class="card card-body mb-3">
+            <div class="mb-3">
+              <label for="temperatureSlider" class="form-label">Temperature: <span id="tempValue">0.4</span></label>
+              <input type="range" class="form-range" min="0.1" max="1" step="0.05" id="temperatureSlider" value="0.4" />
+            </div>
+            <div class="mb-3">
+              <label for="topKSlider" class="form-label">Top-k: <span id="topKValue">40</span></label>
+              <input type="range" class="form-range" min="10" max="100" step="5" id="topKSlider" value="40" />
+            </div>
+            <div class="mb-3">
+              <label for="topPSlider" class="form-label">Top-p: <span id="topPValue">0.4</span></label>
+              <input type="range" class="form-range" min="0.1" max="1" step="0.05" id="topPSlider" value="0.4" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Image Preview -->
+        <div class="text-center">
+          <img id="imageDisplay" class="preview-img rounded shadow d-none" alt="Preview" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap and JS Script -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
