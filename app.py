@@ -1,4 +1,5 @@
 from flask import Flask, request, render_template, jsonify
+import threading
 import requests
 import base64
 import gc
@@ -10,7 +11,7 @@ app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024
 
 # HF api for image-to-text model inference
-def query(image_encoded, args):
+def query(image_encoded, args = {}):
     headers = {
 		"Accept" : "application/json",
 		"Authorization": "Bearer " + HF_TOKEN,
@@ -28,9 +29,18 @@ def query(image_encoded, args):
     
     return response[0]
 
+# Wake up the image-to-text model server
+def wakeup():
+    try:
+        _ = query("wake")
+    except:
+        pass
+    return
+
 # Route for the main page
 @app.route('/')
 def index():
+    threading.Thread(target = wakeup).start()
     return render_template('index.html')
 
 # Caption request
@@ -80,4 +90,4 @@ def request_entity_too_large(error):
     return jsonify({'error': 'File too large. Please keep the file size under 10MB'}), 413
     
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False)
