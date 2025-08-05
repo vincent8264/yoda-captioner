@@ -1,5 +1,5 @@
 from flask import Flask, request, render_template, jsonify
-from model_loader import ImageCaptionModel
+from model_loader import ImageCaptionModel, DummyModel
 from PIL import Image
 import gc
 import json
@@ -8,7 +8,7 @@ import os
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024
 
-model = ImageCaptionModel()
+model = DummyModel()
 
 # Route for the main page
 @app.route('/')
