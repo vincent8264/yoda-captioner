@@ -27,7 +27,10 @@ def query(image_encoded, args = {}):
         }  
 	).json()
     
-    return response[0]
+    try:
+        return response[0]
+    except:
+        return response
 
 # Wake up the image-to-text model server
 def wakeup():
@@ -76,6 +79,8 @@ def caption():
     # Model Inference with API
     response = query(image_encoded, args)
     if 'error' in response:
+        if '503' in response['error']:
+            return jsonify({'error': "Server starting up, please wait for a moment"}), 503
         app.logger.error(f'Model error: {response["error"]}')
         return jsonify({'error': f'Model error: {response["error"]}'}), 500
     caption = response['generated_caption']
@@ -88,6 +93,6 @@ def caption():
 @app.errorhandler(413)
 def request_entity_too_large(error):
     return jsonify({'error': 'File too large. Please keep the file size under 10MB'}), 413
-    
+  
 if __name__ == '__main__':
     app.run(debug=False)
