@@ -58,17 +58,14 @@ def caption():
         return jsonify({'error': f'Image encoding error: {e}'}), 500
     
     # Get generation arguments
-    args = {}
+    settings = {}
     try:
         settings = json.loads(request.form.get('settings'))
-        args['temperature'] = float(settings.get('temperature'))
-        args['top_k'] = int(settings.get('top_k'))
-        args['top_p'] = float(settings.get('top_p'))
     except: 
         pass
     
     # Model Inference with API
-    response = query(image_encoded, args)
+    response = query(image_encoded, settings)
     if 'error' in response:
         if '503' in response['error']:
             return jsonify({'error': "Server starting up, please wait for a moment"}), 503
