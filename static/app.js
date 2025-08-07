@@ -1,4 +1,3 @@
-
 // Dynamic settings button
 const settingsPanel = document.getElementById('settingsPanel');
 const toggleBtn = document.getElementById('toggleSettingsBtn');
@@ -29,7 +28,7 @@ topPSlider.addEventListener('input', () => {
     topPValue.textContent = topPSlider.value;
 });
 
-// Image Preview
+// Image preview - Only runs when a new image is uploaded
 function previewImage(input) {
     const display = document.getElementById('imageDisplay');
     const errorBox = document.getElementById('errorBox');
@@ -53,38 +52,55 @@ async function generateCaption() {
     const captionText = document.getElementById('captionText');
     const errorBox = document.getElementById('errorBox');
     const generateBtn = document.getElementById('generateBtn');
-
-    const file = fileInput.files[0];
-    if (!file) {
-        errorBox.textContent = 'Please select an image first.';
-        errorBox.classList.remove('d-none');
-        return;
-    }
-
-    // Reset UI and send request
-    captionOutput.classList.add('d-none');
-    captionText.textContent = '';
-    errorBox.classList.add('d-none');
-    errorBox.textContent = '';
-    generateBtn.disabled = true;
-    generateBtn.textContent = 'Generating...';
-    
     const settings = {
         temperature: parseFloat(document.getElementById('temperatureSlider').value),
         top_k: parseInt(document.getElementById('topKSlider').value),
         top_p: parseFloat(document.getElementById('topPSlider').value),
     };
 
-    const formData = new FormData();
-    formData.append('image', file);
-    formData.append('settings', JSON.stringify(settings));
+    captionOutput.classList.add('d-none');
+    captionText.textContent = '';
+    errorBox.classList.add('d-none');
+    errorBox.textContent = '';
 
+    // Before starting, check file existence, type, and size
+    let file = fileInput.files[0];
+    if (!file) {
+        errorBox.textContent = 'Please select an image first.';
+        errorBox.classList.remove('d-none');
+        return;
+    }
+    const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+        errorBox.textContent = 'Only JPG, PNG, or WebP images are allowed.';
+        errorBox.classList.remove('d-none');
+        return;
+    }
+    const maxSize = 30;
+    if (file.size > maxSize * 1024 * 1024) {
+        errorBox.textContent = `Image size must be less than ${maxSize} MB.`;
+        errorBox.classList.remove('d-none');
+        return;
+    }
+
+    // Disable button
+    generateBtn.disabled = true;
+    generateBtn.textContent = 'Generating...';
+
+    // Compress image and send request
     try {
+        file = await compressImage(file);
+
+        const formData = new FormData();
+        formData.append('image', file);
+        formData.append('settings', JSON.stringify(settings));
+
         const response = await fetch('/caption', {
             method: 'POST',
             body: formData
         });
-
+        
+        // Parse response
         let data = null;
         try {
             data = await response.json();
@@ -108,4 +124,24 @@ async function generateCaption() {
         generateBtn.disabled = false;
         generateBtn.textContent = 'Generate Caption';
     }
+}
+
+async function compressImage(file) {
+    return new Promise((resolve, reject) => {
+        new Compressor(file, {
+            quality: 0.8,
+            convertSize: 0,          
+            maxWidth: 512,       
+            maxHeight: 512,  
+            success(result) {
+                const compressedFile = new File([result], file.name, {
+                    type: 'image/jpeg',
+                });
+                resolve(compressedFile);
+            },
+            error(err) {
+                reject(err);
+            },
+        });
+    });
 }

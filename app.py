@@ -49,18 +49,9 @@ def index():
 # Caption request
 @app.route('/caption', methods=['POST'])
 def caption():
-    # Check file existence
-    file = request.files.get('image')
-    if not file:
-        return jsonify({'error': 'No file uploaded.'}), 400
-
-    # Validate image type
-    ext = os.path.splitext(file.filename)[1].lower()
-    if ext not in ['.jpg', '.jpeg', '.png']:
-        return jsonify({'error': 'Only .jpg, .jpeg, or .png files are allowed.'}), 400
-    
     # Encode Image to base64
     try:
+        file = request.files.get('image')
         image_encoded = base64.b64encode(file.read()).decode("utf-8")
     except Exception as e:
         app.logger.error(f'Image encoding error: {e}')
@@ -92,7 +83,7 @@ def caption():
 
 @app.errorhandler(413)
 def request_entity_too_large(error):
-    return jsonify({'error': 'File too large. Please keep the file size under 10MB'}), 413
-  
+    return jsonify({'error': 'File size exceeds backend server limits.'}), 413
+ 
 if __name__ == '__main__':
     app.run(debug=False)
