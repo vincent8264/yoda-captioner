@@ -51,7 +51,9 @@ async function generateCaption() {
     const captionOutput = document.getElementById('captionOutput');
     const captionText = document.getElementById('captionText');
     const errorBox = document.getElementById('errorBox');
-    const generateBtn = document.getElementById('generateBtn');
+    const button = document.getElementById('generateBtn');
+    const buttonText = document.getElementById('generateBtnText');
+    const spinner = document.getElementById('generateBtnSpinner');
     const settings = {
         temperature: parseFloat(document.getElementById('temperatureSlider').value),
         top_k: parseInt(document.getElementById('topKSlider').value),
@@ -84,8 +86,9 @@ async function generateCaption() {
     }
 
     // Disable button
-    generateBtn.disabled = true;
-    generateBtn.textContent = 'Generating...';
+    button.disabled = true;
+    buttonText.textContent = 'Generating...';
+    spinner.classList.remove('d-none');
 
     // Compress image and send request
     try {
@@ -121,8 +124,9 @@ async function generateCaption() {
         errorBox.textContent = error.message || 'An unexpected error occurred.';
         errorBox.classList.remove('d-none');
     } finally {
-        generateBtn.disabled = false;
-        generateBtn.textContent = 'Generate Caption';
+        button.disabled = false;
+        buttonText.textContent = 'Generate Caption';
+        spinner.classList.add('d-none');
     }
 }
 
